@@ -5,7 +5,6 @@ import java.util.List;
 
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.*;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,8 +13,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@Table(name = "USERS")
-public class User extends BaseEntity {
+public class User {
+
     @Id
     private Long id;
     private String firstName;
@@ -28,6 +27,19 @@ public class User extends BaseEntity {
     @JoinColumn(name = "userId", referencedColumnName = "id")
     private List<Authority> authorities;
 
+    //Common Columns
+    @Column(name ="CREATED_DATE")
+    @Nonnull
+    private LocalDate createdDate;
+    @Column(name ="MODIFIED_DATE")
+    @Nonnull
+    private LocalDate modifiedDate;
+    @Column(name ="CREATED_BY")
+    private String createdBy;
+    @Column(name ="MODIFIED_BY")
+    private String modifiedBy;
+    @Column(name="IS_ACTIVE")
+    private Boolean isActive;
 
 //    private List<String> roles;
 }

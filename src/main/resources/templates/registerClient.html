@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Client Onboarding</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css"
+        integrity="sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700" rel="stylesheet">
+    <link rel="stylesheet" href="css/registerClient.css">
+    <script src="js/registerClient.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsencrypt/2.3.1/jsencrypt.min.js" async></script>
+</head>
+
+<body>
+    <div class="main-block">
+        <div class="left-part">
+            <i class="fas fa-envelope"></i>
+            <i class="fas fa-at"></i>
+            <i class="fas fa-mail-bulk"></i>
+        </div>
+        <form id="clientForm">
+            <h1>Register Client</h1>
+            <div id="editDiv" class="info">
+                <label>Application Name</label>
+                <input class="fname" type="text" id="appName">
+                <label>Re-Direct URL</label>
+                <input type="text" id="redirectUrl">
+                <button type="button" id="generate" onclick="generateClientCredentials()">Generate Client
+                    Credentials</button>
+            </div>
+        </form>
+    </div>
+</body>
+
+</html>

@@ -24,8 +24,7 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 @EnableWebSecurity
 public class AuthorizationServerConfig {
 
-    @Autowired
-    RSAKeyManager keyManager;
+    KeyManager keyManager;
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain securityFilterChainAuthorizationServer(HttpSecurity http) throws Exception {
@@ -40,8 +39,10 @@ public class AuthorizationServerConfig {
     @Bean
     public SecurityFilterChain securityFilterChainRequestAuthentication(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(requestManager -> requestManager
-                        .anyRequest()
-                        .permitAll()).cors().and().csrf().disable();
+                .anyRequest()
+                .authenticated()
+        ).cors().and().csrf().disable()
+                .formLogin();
         return http.build();
     }
 
@@ -61,4 +62,8 @@ public class AuthorizationServerConfig {
         return AuthorizationServerSettings.builder().build();
     }
 
+    @Autowired
+    public void setKeyManager(KeyManager keyManager) {
+        this.keyManager = keyManager;
+    }
 }

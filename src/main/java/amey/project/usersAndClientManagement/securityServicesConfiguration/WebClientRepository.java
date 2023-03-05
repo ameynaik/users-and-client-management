@@ -4,6 +4,9 @@ import amey.project.usersAndClientManagement.entities.Client;
 import amey.project.usersAndClientManagement.models.ClientDTO;
 import amey.project.usersAndClientManagement.repository.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -16,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.time.Duration;
+import java.time.LocalDate;
 
 @Service
 public class WebClientRepository implements RegisteredClientRepository {
@@ -25,16 +29,22 @@ public class WebClientRepository implements RegisteredClientRepository {
     @Autowired
     PasswordEncoder encoder;
 
-
+    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
     @Override
-    public void save(RegisteredClient registeredClient) {
+    public void save(RegisteredClient registeredClient){
         // using saveClient instead.
-    }
-    public void saveClient(ClientDTO clientDto){
-        Assert.notNull(clientDto,"Null Client Details cannot be saved");
-        Client client = getClientFromDTO(clientDto);
+        Authentication currentUser = this.securityContextHolderStrategy.getContext().getAuthentication();
+        Assert.notNull(registeredClient,"Null Client Details cannot be saved");
+        try{
+            this.findByClientId(registeredClient.getClientId());
+            throw new RuntimeException("Client with clientId : " + registeredClient.getClientId() + "exists");
+        }catch(RuntimeException exception){
+            // exception caused because client does not exist;
+        }
+        Client client = prepareEntityFromRegisteredClient(registeredClient, currentUser.getName());
         clientRepository.save(client);
     }
+
 
     @Override
     public RegisteredClient findById(String id) {
@@ -73,18 +83,29 @@ public class WebClientRepository implements RegisteredClientRepository {
 
 
 
-    private Client getClientFromDTO(ClientDTO clientDTO){
-        Client client = Client.builder()
-                .clientName(clientDTO.getClientName())
-                .clientId(clientDTO.getClientId())
-                .clientSecret(encoder.encode(clientDTO.getClientSecret()))
-                .redirectUri(clientDTO.getRedirectUri())
-                .build();
-        client.setCreatedBy(clientDTO.getCreatedBy());
-        client.setIsActive(clientDTO.getIsActive());
-        client.setModifiedBy(clientDTO.getModifiedBy());
-        client.setModifiedDate(clientDTO.getModifiedDate());
-        return client;
+    private Client prepareEntityFromRegisteredClient(RegisteredClient registeredClient,String username){
+
+        Client entity = new Client();
+        entity.setClientName(registeredClient.getClientName());
+        entity.setClientId(registeredClient.getClientId());
+        entity.setClientSecret(encoder.encode(registeredClient.getClientSecret()));
+        entity.setRedirectUri(registeredClient.getRedirectUris().stream().toList().get(0)); // saving only one redirectUris
+        entity.setCreatedBy(username);
+        entity.setCreatedDate(LocalDate.now());
+        entity.setModifiedBy(username);
+        entity.setModifiedDate(LocalDate.now());
+        entity.setIsActive(Boolean.TRUE);
+
+        return entity;
+    }
+    @Autowired
+    public void setClientRepository(ClientRepository clientRepository) {
+        this.clientRepository = clientRepository;
+    }
+
+    @Autowired
+    public void setEncoder(PasswordEncoder encoder) {
+        this.encoder = encoder;
     }
 
 }
